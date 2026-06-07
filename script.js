@@ -2,203 +2,273 @@ let orders =
 JSON.parse(localStorage.getItem("orders")) || [];
 
 function save() {
-localStorage.setItem(
-"orders",
-JSON.stringify(orders)
-);
+    localStorage.setItem(
+        "orders",
+        JSON.stringify(orders)
+    );
 
-render();
+    render();
 }
 
-function createOrder(){
+function createOrder() {
 
-const name =
-document.getElementById("orderName").value;
+    const name =
+        document.getElementById("orderName").value;
 
-const cost =
-parseFloat(
-document.getElementById("orderCost").value
-);
+    const cost =
+        parseFloat(
+            document.getElementById("orderCost").value
+        );
 
-if(!name || !cost) return;
+    if (!name || !cost) {
+        alert("Omple tots els camps");
+        return;
+    }
 
-orders.push({
-name,
-cost,
-shirts:[]
-});
+    orders.push({
+        name,
+        cost,
+        shirts: []
+    });
 
-save();
+    document.getElementById("orderName").value = "";
+    document.getElementById("orderCost").value = "";
+
+    save();
 }
 
-function addShirt(index){
+function addShirt(orderIndex) {
 
-const shirtName =
-prompt("Nom samarreta:");
+    const shirtName =
+        prompt("Nom de la samarreta:");
 
-if(!shirtName) return;
+    if (!shirtName) return;
 
-const shirtCost =
-orders[index].cost / 4;
+    const shirtCost =
+        parseFloat(
+            prompt("Cost de la samarreta:")
+        );
 
-orders[index].shirts.push({
-name:shirtName,
-cost:shirtCost,
-sold:false,
-salePrice:0
-});
+    if (isNaN(shirtCost)) return;
 
-save();
+    orders[orderIndex].shirts.push({
+        name: shirtName,
+        cost: shirtCost,
+        sold: false,
+        salePrice: 0
+    });
+
+    save();
 }
 
-function sellShirt(orderIndex, shirtIndex){
+function sellShirt(orderIndex, shirtIndex) {
 
-const price =
-parseFloat(
-prompt("Preu venda:")
-);
+    const price =
+        parseFloat(
+            prompt("Preu de venda:")
+        );
 
-if(!price) return;
+    if (isNaN(price)) return;
 
-orders[orderIndex]
-.shirts[shirtIndex]
-.sold = true;
+    orders[orderIndex]
+        .shirts[shirtIndex]
+        .sold = true;
 
-orders[orderIndex]
-.shirts[shirtIndex]
-.salePrice = price;
+    orders[orderIndex]
+        .shirts[shirtIndex]
+        .salePrice = price;
 
-save();
+    save();
 }
 
-function render(){
+function deleteShirt(orderIndex, shirtIndex) {
 
-const container =
-document.getElementById("orders");
+    const confirmDelete =
+        confirm(
+            "Segur que vols eliminar aquesta samarreta?"
+        );
 
-container.innerHTML="";
+    if (!confirmDelete) return;
 
-let revenue=0;
-let investment=0;
-let stock=0;
+    orders[orderIndex]
+        .shirts.splice(shirtIndex, 1);
 
-orders.forEach((order,orderIndex)=>{
-
-investment += order.cost;
-
-let html = `
-<div class="order">
-
-<h2>${order.name}</h2>
-
-<p>
-Cost Temu:
-${order.cost.toFixed(2)}€
-</p>
-
-<button onclick="
-addShirt(${orderIndex})
-">
-➕ Afegir Samarreta
-</button>
-`;
-
-order.shirts.forEach(
-(shirt,shirtIndex)=>{
-
-if(shirt.sold){
-revenue += shirt.salePrice;
-}else{
-stock++;
+    save();
 }
 
-html += `
-<div class="shirt">
+function deleteOrder(orderIndex) {
 
-<span>
-${shirt.name}
-</span>
+    const confirmDelete =
+        confirm(
+            "Segur que vols eliminar aquest pedido?"
+        );
 
-<span>
-${shirt.sold
-? "✅ "+shirt.salePrice+"€"
-: "❌ No venuda"}
-</span>
+    if (!confirmDelete) return;
 
-${
-!shirt.sold
-?
-`<button onclick="
-sellShirt(
-${orderIndex},
-${shirtIndex}
-)">
-Vendre
-</button>`
-:
-""
+    orders.splice(orderIndex, 1);
+
+    save();
 }
 
-</div>
-`;
-});
+function exportData() {
 
-html += "</div>";
+    const blob =
+        new Blob(
+            [
+                JSON.stringify(
+                    orders,
+                    null,
+                    2
+                )
+            ],
+            {
+                type: "application/json"
+            }
+        );
 
-container.innerHTML += html;
+    const a =
+        document.createElement("a");
 
-});
+    a.href =
+        URL.createObjectURL(blob);
 
-const profit =
-revenue - investment;
+    a.download =
+        "vinted-backup.json";
 
-document.getElementById(
-"profit"
-).innerText =
-profit.toFixed(2)+"€";
-
-document.getElementById(
-"revenue"
-).innerText =
-revenue.toFixed(2)+"€";
-
-document.getElementById(
-"investment"
-).innerText =
-investment.toFixed(2)+"€";
-
-document.getElementById(
-"stock"
-).innerText =
-stock;
+    a.click();
 }
 
-function exportData(){
+function render() {
 
-const blob =
-new Blob(
-[
-JSON.stringify(
-orders,
-null,
-2
-)
-],
-{
-type:"application/json"
-}
-);
+    const container =
+        document.getElementById("orders");
 
-const a =
-document.createElement("a");
+    container.innerHTML = "";
 
-a.href =
-URL.createObjectURL(blob);
+    let revenue = 0;
+    let investment = 0;
+    let stock = 0;
 
-a.download =
-"vinted-backup.json";
+    orders.forEach(
+        (order, orderIndex) => {
 
-a.click();
+            investment += order.cost;
+
+            let html = `
+            <div class="order">
+
+                <h2>${order.name}</h2>
+
+                <p>
+                    Cost Temu:
+                    ${order.cost.toFixed(2)}€
+                </p>
+
+                <button onclick="addShirt(${orderIndex})">
+                    ➕ Afegir Samarreta
+                </button>
+
+                <button
+                    style="background:#e53935;margin-left:10px;"
+                    onclick="deleteOrder(${orderIndex})">
+                    🗑️ Eliminar Pedido
+                </button>
+            `;
+
+            order.shirts.forEach(
+                (shirt, shirtIndex) => {
+
+                    if (shirt.sold) {
+                        revenue += shirt.salePrice;
+                    } else {
+                        stock++;
+                    }
+
+                    const profit =
+                        shirt.salePrice - shirt.cost;
+
+                    html += `
+                    <div class="shirt">
+
+                        <span>
+                            ${shirt.name}
+                        </span>
+
+                        <span>
+                            Cost:
+                            ${shirt.cost.toFixed(2)}€
+                        </span>
+
+                        <span>
+                            ${
+                                shirt.sold
+                                ? `✅ Venuda per ${shirt.salePrice.toFixed(2)}€ | Benefici: ${profit.toFixed(2)}€`
+                                : "❌ No venuda"
+                            }
+                        </span>
+
+                        ${
+                            !shirt.sold
+                            ?
+                            `
+                            <button
+                                onclick="
+                                sellShirt(
+                                    ${orderIndex},
+                                    ${shirtIndex}
+                                )">
+                                💰 Vendre
+                            </button>
+                            `
+                            :
+                            ""
+                        }
+
+                        <button
+                            style="background:#e53935"
+                            onclick="
+                            deleteShirt(
+                                ${orderIndex},
+                                ${shirtIndex}
+                            )">
+                            🗑️
+                        </button>
+
+                    </div>
+                    `;
+                }
+            );
+
+            html += `
+            </div>
+            `;
+
+            container.innerHTML += html;
+        }
+    );
+
+    const profit =
+        revenue - investment;
+
+    document.getElementById(
+        "profit"
+    ).innerText =
+        profit.toFixed(2) + "€";
+
+    document.getElementById(
+        "revenue"
+    ).innerText =
+        revenue.toFixed(2) + "€";
+
+    document.getElementById(
+        "investment"
+    ).innerText =
+        investment.toFixed(2) + "€";
+
+    document.getElementById(
+        "stock"
+    ).innerText =
+        stock;
 }
 
 render();
