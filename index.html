@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vinted Manager</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+<h1>👕 Vinted Manager</h1>
+</header>
+
+<section class="dashboard">
+
+<div class="card">
+<h3>💰 Benefici</h3>
+<p id="profit">0€</p>
+</div>
+
+<div class="card">
+<h3>📈 Ingressos</h3>
+<p id="revenue">0€</p>
+</div>
+
+<div class="card">
+<h3>💸 Inversió</h3>
+<p id="investment">0€</p>
+</div>
+
+<div class="card">
+<h3>📦 Stock</h3>
+<p id="stock">0</p>
+</div>
+
+</section>
+
+<section class="new-order">
+
+<h2>Nou Pedido</h2>
+
+<input type="text" id="orderName" placeholder="Pedido #1">
+<input type="number" id="orderCost" placeholder="Cost Temu">
+
+<button onclick="createOrder()">
+Crear Pedido
+</button>
+
+</section>
+
+<section id="orders"></section>
+
+<button class="backup" onclick="exportData()">
+📥 Exportar dades
+</button>
+
+<script src="script.js"></script>
+
+</body>
+</html>
