@@ -1,23 +1,23 @@
 let orders = JSON.parse(localStorage.getItem("orders")) || [];
 
-/* =======================
-        SAVE DATA
-======================= */
+/* =========================
+        SAVE
+========================= */
 function save() {
     localStorage.setItem("orders", JSON.stringify(orders));
     render();
 }
 
-/* =======================
+/* =========================
         CREATE ORDER
-======================= */
+========================= */
 function createOrder() {
 
     const name = document.getElementById("orderName").value;
     const cost = parseFloat(document.getElementById("orderCost").value);
 
     if (!name || isNaN(cost)) {
-        alert("Omple correctament el pedido");
+        alert("Introdueix dades correctes");
         return;
     }
 
@@ -33,9 +33,9 @@ function createOrder() {
     save();
 }
 
-/* =======================
+/* =========================
         ADD PRODUCT
-======================= */
+========================= */
 function addShirt(orderIndex) {
 
     const type = prompt("Tipus (samarreta / pantalons):");
@@ -62,9 +62,9 @@ function addShirt(orderIndex) {
     save();
 }
 
-/* =======================
+/* =========================
         SELL PRODUCT
-======================= */
+========================= */
 function sellShirt(orderIndex, shirtIndex) {
 
     const price = parseFloat(prompt("Preu de venda:"));
@@ -76,31 +76,33 @@ function sellShirt(orderIndex, shirtIndex) {
     save();
 }
 
-/* =======================
-        DELETE PRODUCT
-======================= */
+/* =========================
+        DELETE SHIRT
+========================= */
 function deleteShirt(orderIndex, shirtIndex) {
 
     if (!confirm("Eliminar aquesta peça?")) return;
 
     orders[orderIndex].shirts.splice(shirtIndex, 1);
+
     save();
 }
 
-/* =======================
+/* =========================
         DELETE ORDER
-======================= */
+========================= */
 function deleteOrder(orderIndex) {
 
     if (!confirm("Eliminar aquest pedido?")) return;
 
     orders.splice(orderIndex, 1);
+
     save();
 }
 
-/* =======================
+/* =========================
         EXPORT DATA
-======================= */
+========================= */
 function exportData() {
 
     const blob = new Blob(
@@ -114,9 +116,48 @@ function exportData() {
     a.click();
 }
 
-/* =======================
-        RENDER UI
-======================= */
+/* =========================
+        IMPORT DATA
+========================= */
+function importData() {
+
+    const input = document.getElementById("fileInput");
+    input.click();
+
+    input.onchange = function () {
+
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+
+            try {
+                const data = JSON.parse(e.target.result);
+
+                if (!Array.isArray(data)) {
+                    alert("Fitxer incorrecte");
+                    return;
+                }
+
+                orders = data;
+                save();
+
+                alert("Dades importades correctament 💾");
+
+            } catch (err) {
+                alert("Error llegint el fitxer");
+            }
+        };
+
+        reader.readAsText(file);
+    };
+}
+
+/* =========================
+        RENDER
+========================= */
 function render() {
 
     const container = document.getElementById("orders");
@@ -208,15 +249,14 @@ function render() {
     updateCharts();
 }
 
-/* =======================
+/* =========================
         CHARTS
-======================= */
+========================= */
 function updateCharts() {
 
     let shirts = 0;
     let pants = 0;
 
-    let colorCount = {};
     let colorProfit = {};
 
     orders.forEach(o => {
@@ -225,10 +265,9 @@ function updateCharts() {
             if (s.type === "pantalons") pants++;
             else shirts++;
 
-            colorCount[s.color] = (colorCount[s.color] || 0) + 1;
-
             const profit = (s.salePrice || 0) - s.cost;
-            colorProfit[s.color] = (colorProfit[s.color] || 0) + profit;
+            colorProfit[s.color] =
+                (colorProfit[s.color] || 0) + profit;
         });
     });
 
